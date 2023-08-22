@@ -50,7 +50,8 @@ def segment(input_filename: str) -> None:
 	red_p = red_p.convert("L")
 	red_p.save(input_filename + "red.png")
 	
-# iteration 
+# iteration
+# TODO: make directory/path local to the repo instead of specific to personal computer
 folder_dir = "C:/Users/sachi/Documents/IPILAB/Completed_Averaged Images"
 for images in os.listdir(folder_dir):
 	# check if the image ends with png
