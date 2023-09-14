@@ -1,0 +1,234 @@
+#ifndef PCL_SIGNED_EUCLIDEAN_DISTANCE_TRANSFORM_FILTER
+#define PCL_SIGNED_EUCLIDEAN_DISTANCE_TRANSFORM_FILTER
+
+#include <pcl/filter/image/ImageFilterBase.h>
+#include <pcl/misc/SafeUnsafeRegionGenerator.h>
+#include <pcl/iterator/ImageNeighborIterator.h>
+#include <pcl/filter/boundary_handler/RepeatingBoundaryHandler.h>
+#include <pcl/math.h>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/numeric/conversion/bounds.hpp>
+
+namespace pcl
+{
+	namespace filter
+	{
+
+		/**
+			Note: Foreground is fixed at where input is evaluated as true
+		**/
+		template <class InputImageType, class OutputImageType, template <class> class BoundaryHandlerClass=RepeatingBoundaryHandler>
+		class SignedEuclideanDistanceTransformFilter: public ImageFilterBase
+		{
+		public:
+			typedef BoundaryHandlerClass<InputImageType> BoundaryHandlerType;
+			typedef typename OutputImageType::IoValueType OutputValueType;
+
+			static typename OutputImageType::Pointer Compute(const typename InputImageType::ConstantPointer& input, bool use_square_distance, bool use_spacing, const Region3D<int>& process_region=Region3D<int>().reset())
+			{
+				SignedEuclideanDistanceTransformFilter filter;
+				filter.setProcessRegion(process_region);
+				filter.setUseSquareDistance(use_square_distance);
+				filter.setUseSpacing(use_spacing);
+				filter.setInput(input);
+				filter.update();
+				return filter.getOutput();
+			}
+
+
+			SignedEuclideanDistanceTransformFilter() {}
+
+			void setUseSpacing(bool en)
+			{
+				m_UseSpacing = en;
+			}
+
+			void setUseSquareDistance(bool en)
+			{
+				m_UseSquareDistance = en;
+			}
+
+			void setInput(const typename InputImageType::ConstantPointer& input)
+			{
+				m_Input = input;
+				if (this->m_ProcessRegion.empty()) setProcessRegion(m_Input->getRegion());
+			}
+
+			BoundaryHandlerType& getBoundaryHandler() 
+			{
+				return m_BoundaryHandler;
+			}
+
+			void update()
+			{
+				//Setting up environment
+				m_BoundaryHandler.setImage(m_Input);
+				this->m_ProcessRegion.setIntersect(m_Input->getRegion()); //Making sure that process region is within the input
+				m_Output = OutputImageType::New(m_Input); //Output is created based on the input as template (same buffer size!)
+				ImageHelper::Fill(m_Output, m_ProcessRegion, boost::numeric::bounds<OutputValueType>::highest());
+
+				//Initialization
+				initialize();
+
+				//Actual computation
+				const int dimension = 3;
+				for (int d=0; d<dimension; ++d) {
+					int cur_dim[dimension-1];
+					for (int c=0, i=0; i<dimension; ++i) if (i!=d) {
+						cur_dim[c] = i+1;
+						++c;
+					}
+					ImageIterator iter(m_Output, ImageIterator::Axis(cur_dim[0]), ImageIterator::Axis(cur_dim[1]));
+					pcl_ForIterator(iter) {
+						voronoi(d, iter);
+					}
+				}
+
+				//Finalize values
+				ImageIterator iter(m_Input);
+				iter.setRegion(m_ProcessRegion);
+				if (m_UseSquareDistance) {
+					pcl_ForIterator(iter) {
+						if (m_Input->get(iter)) m_Output->set(iter, m_Output->get(iter));
+						else m_Output->set(iter, -m_Output->get(iter));
+					}
+				} else {
+					pcl_ForIterator(iter) {
+						if (m_Input->get(iter)) m_Output->set(iter, sqrt(m_Output->get(iter)));
+						else m_Output->set(iter, -sqrt(m_Output->get(iter)));
+					}
+				}
+			}
+
+			typename OutputImageType::Pointer getOutput()
+			{
+				return m_Output;
+			}
+
+		protected:
+			typename InputImageType::ConstantPointer m_Input;
+			typename OutputImageType::Pointer m_Output;
+			BoundaryHandlerType m_BoundaryHandler;
+			bool m_UseSpacing;
+			bool m_UseSquareDistance;
+
+			inline bool remove( OutputValueType d1, OutputValueType d2, OutputValueType df, OutputValueType x1, OutputValueType x2, OutputValueType xf )
+			{
+				OutputValueType a = x2 - x1;
+				OutputValueType b = xf - x2;
+				OutputValueType c = xf - x1;
+				return ( c*abs(d2) - b*abs(d1) - a*abs(df) - a*b*c ) > 0;
+			}
+
+			void voronoi(int d, long index)
+			{
+				//std::cout << "#" << d << " " << index << " " << m_Input->toPoint(index) << " " << m_Input->getOffsetTable()[d] << std::endl;
+				int size = m_ProcessRegion.getSize()[d];
+				std::vector<OutputValueType> g(size, 0);
+				std::vector<OutputValueType> h(size, 0);
+				long offset = m_Input->getOffsetTable()[d];
+				int l = -1;
+				long x = index - offset;
+				double i_offset = 1;
+				if (m_UseSpacing) i_offset = m_Input->getSpacing()[d];
+				double i = -i_offset;
+				for (int i_count=0; i_count<size; i_count++) {
+					x += offset;
+					i += i_offset;
+					OutputValueType f = m_Output->get(x);
+					if (f != boost::numeric::bounds<OutputValueType>::highest()) {
+						if (l<1) {
+							++l;
+							h[l] = i;
+							g[l] = f;
+							//std::cout << m_Input->toPoint(x) << g[l] << " ";
+						} else {
+							while (l>=1 && remove(g[l-1], g[l], f, h[l-1], h[l], i)) {
+								--l;
+							}
+							++l;
+							h[l] = i;
+							g[l] = f;
+							//std::cout << m_Input->toPoint(x) << g[l] << " ";
+						}
+					}
+				}
+				//std::cout << std::endl;
+				if (l==-1) return;
+				int ns = l;
+				l = 0;
+				i = -i_offset;
+				x = index - offset;
+				for (int i_count=0; i_count<size; i_count++) {
+					x += offset;
+					i += i_offset;
+					while (l<ns && ( g[l]+square(h[l]-i) ) > ( g[l+1] + square(h[l+1]-i) )) {
+						++l;
+					}
+					m_Output->set(x, g[l] + square(h[l]-i));
+				}
+			}
+
+			template<class ImageIteratorType, class InitIteratorType, class BorderTest>
+			void initialize_details(const Point3D<double>& sub_spacing, ImageIteratorType& image_iter, InitIteratorType& init_iter, BorderTest border_test)
+			{
+				pcl_ForIterator(image_iter) {
+					bool origin_val = m_Input->get(image_iter);
+					init_iter.setOrigin(image_iter.getPoint(), image_iter);
+					bool is_border = false;
+					pcl_ForIterator(init_iter) {
+						if (border_test(origin_val, init_iter)) {
+							is_border = true;
+							break;
+						}
+					}
+					if (is_border) {
+						double min_dist = std::numeric_limits<double>::infinity();
+						Point3D<double> source;
+						pcl_ForIterator(init_iter) {
+							if (border_test(origin_val, init_iter)) {
+								auto& offset = init_iter.getOffset();
+								double dist = 0;
+								for (int i=0; i<3; ++i) dist += pcl::square(offset[i]*sub_spacing[i]);
+								if (dist<min_dist) {
+									min_dist = dist;
+								}
+							}
+						}
+						m_Output->set(image_iter, min_dist);
+					}
+				}
+			}
+
+			void initialize()
+			{
+				pcl::iterator::ImageNeighborIterator init_iter(m_Input);
+				{
+					auto offset_list = pcl::iterator::ImageNeighborIterator::CreateConnect26Offset();
+					pcl::iterator::ImageNeighborIterator::FilterOffsetList(offset_list, m_ProcessRegion.getSize());
+					init_iter = offset_list;
+				}
+
+				Point3D<double> sub_spacing(0.5,0.5,0.5);
+				if (m_UseSpacing) sub_spacing = m_Input->getSpacing()*0.5;
+				misc::SafeUnsafeRegionGenerator rgn_gen(m_ProcessRegion, m_Input->getRegion(), init_iter.getOffsetRegion());
+				ImageIteratorWithPoint iter(m_Input);
+				if (!rgn_gen.getSafeRegion().empty()) {
+					iter.setRegion(rgn_gen.getSafeRegion());
+					initialize_details(sub_spacing, iter, init_iter, [&](bool origin_val, pcl::iterator::ImageNeighborIterator& it)->bool {
+						return static_cast<bool>(m_Input->get(it))!=origin_val;
+					});
+				}
+				pcl_ForEach(rgn_gen.getUnsafeRegion(), item) {
+					iter.setRegion(*item);
+					initialize_details(sub_spacing, iter, init_iter, [&](bool origin_val, pcl::iterator::ImageNeighborIterator& it)->bool {
+						return static_cast<bool>(m_BoundaryHandler.get(it))!=origin_val;
+					});
+				}
+			}
+		};
+
+	}
+}
+
+#endif

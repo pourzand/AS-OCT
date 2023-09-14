@@ -1,0 +1,30 @@
+CORNEA:
+  class: FP
+  dce_score: null
+  dice_coefficient: null
+  marking: null
+  pred_detection: 1
+  ref_detection: 0
+  reference_roi: null
+  roi: null
+IRIS:
+  class: FP
+  dce_score: null
+  dice_coefficient: null
+  marking: null
+  pred_detection: 1
+  ref_detection: 0
+  reference_roi: null
+  roi: null
+finished: true
+initials: N/A
+patient_id: N/A
+spacing: !!python/tuple
+- 1.0
+- 1.0
+- 999.0
+visuals:
+  annotation_ss: ./result_oct_v2/DEFAULT/SSA003_OD_Scan3_2/eval/image/CORNEA_a.png
+  original_ss: ./result_oct_v2/DEFAULT/SSA003_OD_Scan3_2/eval/image/cornea_cnn_a_org.png
+  output_ss: ./result_oct_v2/DEFAULT/SSA003_OD_Scan3_2/eval/image/cornea_cnn_a.png
+  preprocessed_ss: path/to/fake/image

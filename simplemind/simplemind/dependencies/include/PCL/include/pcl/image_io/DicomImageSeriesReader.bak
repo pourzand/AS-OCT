@@ -1,0 +1,313 @@
+#ifndef PCL_DICOM_IMAGE_SERIES_READER
+#define PCL_DICOM_IMAGE_SERIES_READER
+
+#include <pcl/image_io/ItkImageReader.h>
+#include <pcl/misc/StringTokenizer.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+#include <list>
+#include <map>
+
+namespace pcl
+{
+	using namespace pcl::image_io;
+	namespace boost_file = boost::filesystem;
+
+	template <class ImageType>
+	class DicomImageSeriesReader: private boost::noncopyable
+	{
+	public:
+		enum SortType { INSTANCE, POSITION, ADDSEQ };
+
+		typedef DicomImageSeriesReader Self;
+		typedef boost::shared_ptr<Self> Pointer;
+
+		static Pointer New()
+		{
+			return Pointer(new Self);
+		}
+
+		void addFile(const std::string& file)
+		{
+			m_File.push_back(file);
+		}
+		int addFilesInDirectory(const std::string& directory)
+		{
+			boost_file::path path(directory); 
+			if (!boost_file::is_directory(path)) return 0;
+
+			int count = 0;
+			boost_file::directory_iterator end_itr;
+			for (boost_file::directory_iterator itr(path); itr!=end_itr; itr++) {
+				if (!boost_file::is_directory(itr->status())) {
+					m_File.push_back(itr->path().string());
+					count++;
+				}
+			}
+			return count;
+		}
+
+		void read(bool sort_according_to_instance=true)
+		{
+			m_MetadataArray.clear();
+			m_SliceExists.clear();
+
+			std::map<int, typename ImageType::Pointer> image_stack;
+			int count = 0;
+			Point3D<int> initial_size;
+			pcl_ForEach(m_File, item) {
+				typename ImageType::Pointer img = ItkImageReader<ImageType>::ReadImage(*item);
+				int instance = count;
+				if (img->getSize().z()>1) {
+					std::stringstream ss;
+					ss << *item << " contains multiple image slices(" << img->getSize().z() << ")!";
+					pcl_ThrowException(ImageReaderException(), ss.str());
+				}
+				if (count==0) {
+					initial_size = img->getSize();
+				} else {
+					if (img->getSize()!=initial_size) {
+						std::stringstream ss;
+						ss << *item << " contains an image of different size compared to the first item " << initial_size.toString();
+						pcl_ThrowException(ImageReaderException(), ss.str());
+					}
+				}
+
+				if (img->getMetadata()) {
+					if (sort_according_to_instance) {
+						Metadata::Iterator iter = img->getMetadata()->find("0020|0013");
+						if (iter==img->getMetadata()->end()) {
+							std::stringstream ss;
+							ss << *item << " cannot find instance number tag (0020,0013)!";
+							pcl_ThrowException(ImageReaderException(), ss.str());
+						} else {
+							instance = atoi(img->getMetadata()->template getValue<std::string>(iter).c_str());
+						}
+					}
+				} else {
+					std::stringstream ss;
+					ss << *item << " does not contain metadata!" << std::endl;
+					pcl_ThrowException(ImageReaderException(), ss.str());
+				}
+
+				image_stack[instance] = img;
+				++count;
+			}
+
+			int min_instance = image_stack.begin()->first,
+				max_instance = image_stack.rbegin()->first;
+			m_SliceExists.resize(max_instance-min_instance+1, false);
+			m_MetadataArray.resize(max_instance-min_instance+1);
+
+			Point3D<double> spacing = getSpacing(image_stack, max_instance-min_instance+1);
+			for (int i=0; i<3; i++) spacing[i] = pcl_Abs(spacing[i]);
+			Point3D<double> origin = image_stack.begin()->second->getOrigin();
+
+			Point3D<int> minp = image_stack.begin()->second->getMinPoint(),
+				maxp = image_stack.begin()->second->getMaxPoint();
+			minp.z() = min_instance;
+			maxp.z() = max_instance;
+
+			m_OutputImage = ImageType::New(minp, maxp, spacing, origin);
+			if (m_OutputImage->UseOrientationMatrix) {
+				m_OutputImage = m_OutputImage->getAlias(minp, spacing, origin, image_stack.begin()->second->getOrientationMatrix());
+			}
+			ImageHelper::Fill(m_OutputImage, -2000);
+			ImageIterator output_iter(m_OutputImage);
+			typedef typename std::map<int, typename ImageType::Pointer>::iterator ImageStackIterator;
+			pcl_ForEach(image_stack, item) {
+				int instance = item->first;
+				ImageIterator source_iter(item->second);
+				Region3D<int> output_region(Point3D<int>(minp.x(), minp.y(), instance), Point3D<int>(maxp.x(), maxp.y(), instance));
+				output_iter.setRegion(output_region);
+				for (source_iter.begin(), output_iter.begin(); !source_iter.end(); source_iter.next(), output_iter.next()) {
+					m_OutputImage->set(output_iter, item->second->get(source_iter));
+				}
+				m_SliceExists[instance-min_instance] = true;
+				m_MetadataArray[instance-min_instance] = item->second->getMetadata();
+			}
+			m_OutputImage->setMetadata(image_stack.begin()->second->getMetadata());
+		}
+
+		bool checkPhysicalCoordinatesValidity() const
+		{
+			std::cout << m_OutputImage->getRegion() << std::endl;
+			Point3D<int> minp = m_OutputImage->getMinPoint();
+			int min_z = m_OutputImage->getMinPoint().z(),
+				max_z = m_OutputImage->getMaxPoint().z();
+			for (int z=min_z; z<=max_z; ++z) {
+				int index = z-min_z;
+				if (sliceExists(index)) {
+					minp.z() = z;
+					Point3D<double> slice_org = m_OutputImage->toPhysicalCoordinate(minp);
+					Point3D<double> meta_org = getImagePositionFromMetadata(index);
+					if (!slice_org.epsilonEqual(meta_org)) return false;
+				}
+			}
+			return true;
+		}
+
+		typename ImageType::Pointer getOutputImage()
+		{
+			return m_OutputImage;
+		}
+
+		std::vector<int> getMissingZCoordinates() const
+		{
+			std::vector<int> missing_z;
+			for (int i=0; i<m_SliceExists.size(); ++i) {
+				if (m_SliceExists[i]==false) missing_z.push_back(i+m_OutputImage->getMinPoint().z());
+			}
+			return missing_z;
+		}
+
+		const std::vector<Metadata::Pointer>& getMetadataArray() const
+		{
+			return m_MetadataArray;
+		}
+
+		const Metadata::Pointer& getMetadata(int z) const
+		{
+			return m_MetadataArray[z-m_OutputImage->getMinPoint().z()];
+		}
+
+		const bool sliceExists(int z) const
+		{
+			return m_SliceExists[z-m_OutputImage->getMinPoint().z()];
+		}
+
+		const Point3D<double> getSlicePosition(int z) const
+		{
+			return getImagePositionFromMetadata(z-m_OutputImage->getMinPoint().z());
+		}
+
+		void interpolateMissingSlices()
+		{
+			for (int z=m_OutputImage->getMinPoint().z(); z<=m_OutputImage->getMaxPoint().z(); ++z) {
+				if (!sliceExists(z)) linearInterpolateSlice(z);
+			}
+		}
+	protected:
+		std::list<std::string> m_File;
+		std::vector<Metadata::Pointer> m_MetadataArray;
+		typename ImageType::Pointer m_OutputImage;
+		std::vector<bool> m_SliceExists;
+
+		DicomImageSeriesReader() {}
+
+		Point3D<double> getImagePositionFromMetadata(int i) const
+		{
+			Point3D<double> return_val;
+			std::string data = m_MetadataArray[i]->getValue<std::string>("0020|0032");
+			misc::StringTokenizer tokenizer(data.c_str());
+			tokenizer.begin(!boost::algorithm::is_any_of("+-1234567890."));
+			return_val[0] = atof(tokenizer.getToken().c_str());
+			tokenizer.next(!boost::algorithm::is_any_of("+-1234567890."));
+			return_val[1] = atof(tokenizer.getToken().c_str());
+			tokenizer.next(!boost::algorithm::is_any_of("+-1234567890."));
+			return_val[2] = atof(tokenizer.getToken().c_str());
+			return return_val;
+		}
+
+		Point3D<double> getSpacing(const std::map<int, typename ImageType::Pointer>& image_stack, int slice_num)
+		{
+			Point3D<double> spacing = image_stack.begin()->second->getSpacing();
+
+			{ //First option of getting spacing between slices
+				Metadata::ConstantPointer metadata = image_stack.begin()->second->getMetadata();
+				Metadata::ConstantIterator iter = metadata->find("0018|0088");
+				if (iter!=metadata->end()) {
+					spacing.z() = atof(metadata->getValue<std::string>(iter).c_str());
+					return spacing;
+				}
+			}
+
+			try {
+				//Second option of getting difference from contigous slices
+				typename std::map<int, typename ImageType::Pointer>::const_iterator iter = image_stack.begin(),
+					end = image_stack.end();
+				int prev_instance = iter->first;
+				++iter;
+				for (; iter!=end; ++iter) {
+					if (iter->first == prev_instance+1) {
+						Metadata::ConstantPointer metadata;
+
+						metadata = iter->second->getMetadata();
+						double cur_loc = atof(metadata->getValue<std::string>("0020|1041").c_str());
+
+						--iter;
+						metadata = iter->second->getMetadata();
+						double prev_loc = atof(metadata->getValue<std::string>("0020|1041").c_str());
+
+						spacing.z() = pcl_Abs(cur_loc-prev_loc);
+						return spacing;
+					} else {
+						prev_instance = iter->first;
+					}
+				}
+
+				//Last option of getting average spacing between slices
+				double start_loc = atof(image_stack.begin()->second->getMetadata()->template getValue<std::string>("0020|1041").c_str()),
+					end_loc = atof(image_stack.rbegin()->second->getMetadata()->template getValue<std::string>("0020|1041").c_str());
+				spacing.z() = pcl_Abs(start_loc-end_loc)/slice_num;
+				return spacing;
+			} catch (...) {
+				//Final option of using image origin directly
+				typename std::map<int, typename ImageType::Pointer>::const_iterator iter = image_stack.begin(),
+					end = image_stack.end();
+				int prev_instance = iter->first;
+				++iter;
+				for (; iter!=end; ++iter) {
+					if (iter->first == prev_instance+1) {
+						Metadata::ConstantPointer metadata;
+
+						double cur_loc = iter->second->getOrigin().z();
+
+						--iter;
+						double prev_loc = iter->second->getOrigin().z();
+
+						spacing.z() = pcl_Abs(cur_loc-prev_loc);
+						return spacing;
+					} else {
+						prev_instance = iter->first;
+					}
+				}
+
+				//Last option of getting average spacing between slices
+				double start_loc = image_stack.begin()->second->getOrigin().z(),
+					end_loc = image_stack.rbegin()->second->getOrigin().z();
+				spacing.z() = pcl_Abs(start_loc-end_loc)/slice_num;
+				return spacing;
+			}
+		}
+
+		void linearInterpolateSlice(int z)
+		{
+			int prev_z, next_z;
+			for (int j=z-1; j>=m_OutputImage->getMinPoint().z(); --j) if (sliceExists(j)) {
+				prev_z = j;
+				break;
+			}
+			for (int j=z+1; j<=m_OutputImage->getMaxPoint().z(); ++j) if (sliceExists(j)) {
+				next_z = j;
+				break;
+			}
+
+			double s = (static_cast<double>(z-prev_z))/(static_cast<double>(next_z-prev_z)),
+				one_minus_s = 1-s;
+			ImageIterator prev_iter(m_OutputImage), iter(m_OutputImage), next_iter(m_OutputImage);
+			Region3D<int> region(m_OutputImage->getRegion());
+			region.getMinPoint()[2] = prev_z; region.getMaxPoint()[2] = prev_z; prev_iter.setRegion(region);
+			region.getMinPoint()[2] = z; region.getMaxPoint()[2] = z; iter.setRegion(region);
+			region.getMinPoint()[2] = next_z; region.getMaxPoint()[2] = next_z; next_iter.setRegion(region);
+
+			pcl_ForIterator3(prev_iter, iter, next_iter) {
+				m_OutputImage->set(iter, m_OutputImage->get(prev_iter)*one_minus_s + m_OutputImage->get(next_iter)*s);
+			}
+		}
+	};
+
+}
+
+#endif

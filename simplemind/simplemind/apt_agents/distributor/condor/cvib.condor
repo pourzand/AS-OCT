@@ -1,0 +1,26 @@
+# Submit file to access the GPU via docker
+
+# Must set the universe to Docker
+universe = docker
+docker_image = registry.cvib.ucla.edu/sm_release:ga_072522_2
+docker_pull_policy = always
+
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+Requirements =  (Machine  == "REDLRADADM23710.ad.medctr.ucla.edu") || (Machine  == "REDWRADMMC23199.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM23621.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM23620.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM23712.ad.medctr.ucla.edu") || (Machine  == "redlradbei05920.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM23713.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM23589.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM14958.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM14959.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM14910.ad.medctr.ucla.edu") || (Machine  == "REDLRADADM11249.ad.medctr.ucla.edu")
+#Requirements = (Machine  == "REDLRADADM23710.ad.medctr.ucla.edu")
+rank = ((machine == "REDLRADADM23710.ad.medctr.ucla.edu")*5) + ((machine == "REDWRADMMC23199.ad.medctr.ucla.edu")*5) + ((machine == "REDLRADADM23589.ad.medctr.ucla.edu")*4) + ((machine == "REDLRADADM14958.ad.medctr.ucla.edu")*3) + ((machine == "REDLRADADM14959.ad.medctr.ucla.edu")*3) + ((machine == "REDLRADADM23620.ad.medctr.ucla.edu")*2) + ((machine == "redlradbei05920.ad.medctr.ucla.edu")*2) + ((machine == "REDLRADADM23621.ad.medctr.ucla.edu")*2) 
+request_cpus = 1
+stream_output = True
+stream_error = True
+
+
+# Tell HTCondor to run 1 instances of our job:
+queue 1
+
+Notification = Error
+on_exit_remove = (ExitBySignal == False) && (ExitCode == 0 || ExitCode == 10)  
+max_retries = 3
+erase_output_and_error_on_restart = False
+

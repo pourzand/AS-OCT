@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+table.list {
+	border-collapse: collapse;
+}
+.list {
+    border: 1px solid black;
+	padding: 10px;
+
+}
+}
+
+.equ {
+
+	border: 0px;
+	padding: 10px;
+	vertical-align: top;
+}
+th {
+  text-align: left;
+}
+
+table#t01 {
+	width:100%;
+}
+
+table#t01 tr:nth-child(even) {
+  background-color: #eee;
+}
+table#t01 tr:nth-child(odd) {
+ background-color: #fff;
+}
+
+table#t01 th {
+ background-color: #fff;
+}
+
+
+table#t02 tr:nth-child(even) {
+  background-color: #fff;
+}
+table#t02 tr:nth-child(odd) {
+ background-color: #fff;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>
+DEFAULT <br>
+N/A
+</h1>
+
+<h3>
+Fitness: 0.9355959337916788
+</h3>
+
+<!-- <img width=100% src=" to_html(final_result["error_hist_plot"]) " > -->
+
+
+<h1>
+Overall Performance Summary
+</h1>
+
+<table class="equ" id="t01">
+<!-- 	<col width="200">
+	<col width="175">
+	<col width="175">
+	<col width="175">
+	<col width="175"> -->
+	<tr class="equ">
+		<th class="equ" width=120px> </th>
+		<th class="equ">Iris</th>
+		<th class="equ">Cornea</th>
+		<!-- <th class="equ">GE Junction</th>
+		<th class="equ">ETT Tip</th>
+		<th class="equ">NG Tube</th> -->
+	</tr>
+
+	<tr class="equ">
+		<th class="equ">[Dice Coefficient]</th>
+		<td class="equ"></td>
+		<td class="equ"></td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">mean</th>
+		<td class="equ">0.928</td>
+		<td class="equ">0.943</td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">std</th>
+		<td class="equ">0.017</td>
+		<td class="equ">0.135</td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">median</th>
+		<td class="equ">0.931</td>
+		<td class="equ">0.963</td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">1st/3rd quartiles</th>
+		<td class="equ">0.916, 0.942</td>
+		<td class="equ">0.955, 0.968</td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">Number annotated cases:</th>
+		<td class="equ">51</td>
+		<td class="equ">51</td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">Number good predictions:</th>
+		<td class="equ">51 cases with meeting 0.8 threshold</td>
+		<td class="equ">50 cases with meeting 0.8 threshold</td>
+	</tr>
+	<!-- <tr class="equ">
+		<td class="equ">Bad markings:</td>
+		<td class="equ">2</td>
+		<td class="equ">3</td>
+	</tr> -->
+	<!-- <tr class="equ">
+		<th class="equ">Detection:</th>
+		<td class="equ">
+			<table class="list" id="t02">
+				<tr class="list">
+					<td class="list">TP: 51</td>
+					<td class="list">FP: 2</td>
+				</tr>
+				<tr class="list">
+					<td class="list">FN: 0</td>
+					<td class="list">TN: 0</td>
+				</tr>
+			</table>
+
+		</td>
+	</tr> -->
+
+	<tr class="equ">
+		<th class="equ">Sensitivity:</th>
+		<td class="equ">1.0</td>
+		<td class="equ">1.0</td>
+	</tr>
+	<tr class="equ">
+		<th class="equ">Specificity:</th>
+		<td class="equ">0.0</td>
+		<td class="equ">0.0</td>
+	</tr>
+
+</table>
+
+<!-- 
+# - ref present/absent
+# - MIU output present/absent
+# - TP/FP/FN/TN
+# - DCE Score
+# - DCE -->
+
+
+<h1>High error cases</h1>
+<table class="list">
+	<tr class="list">
+		<th class="list">Case</th>
+		<th class="list">Iris DCE</th>
+		<th class="list">Cornea DCE</th>
+		<!-- <th class="list">Detection</th> -->
+	</tr>
+<tr class="list">
+		<td class="list"><a href="sub_report/SSA003_OD_Scan3_2.html">SSA003_OD_Scan3_2</a></td>
+		<td class="list">None</td>
+		<td class="list">None</td>
+		<!-- <td class="list">FP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA003_OD_Scan3_9.html">SSA003_OD_Scan3_9</a></td>
+		<td class="list">None</td>
+		<td class="list">None</td>
+		<!-- <td class="list">FP</td> -->
+	</tr>
+</table>
+
+
+<h1>Other cases</h1>
+<table class="list">
+	<tr class="list">
+		<th class="list">Case</th>
+		<th class="list">Iris DCE</th>
+		<th class="list">Cornea DCE</th>
+		<!-- <th class="list">Detection</th> -->
+	</tr>
+<tr class="list">
+		<td class="list"><a href="sub_report/SSA006_OD_Scan2_4.html">SSA006_OD_Scan2_4</a></td>
+		<td class="list">0.943445744617874</td>
+		<td class="list">0.9746388841880222</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OS_Scan2_6.html">SSA005_OS_Scan2_6</a></td>
+		<td class="list">0.9137398329603145</td>
+		<td class="list">0.9723387814148239</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OD_Scan2_9.html">SSA002_OD_Scan2_9</a></td>
+		<td class="list">0.9327509861635003</td>
+		<td class="list">0.9693716294964739</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_8.html">SSA005_OD_Scan2_8</a></td>
+		<td class="list">0.9089256941582043</td>
+		<td class="list">0.957171726498381</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OS_Scan2_10.html">SSA007_OS_Scan2_10</a></td>
+		<td class="list">0.9148885457578992</td>
+		<td class="list">0.9655690985744912</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OS_Scan2_5.html">SSA007_OS_Scan2_5</a></td>
+		<td class="list">0.9288810555899586</td>
+		<td class="list">0.9549455752739234</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OS_Scan3_11.html">SSA002_OS_Scan3_11</a></td>
+		<td class="list">0.9290019227972661</td>
+		<td class="list">0.9671344229693618</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OS_Scan3_4.html">SSA002_OS_Scan3_4</a></td>
+		<td class="list">0.9143894236145159</td>
+		<td class="list">0.9529152234974367</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OD_Scan2_2.html">SSA007_OD_Scan2_2</a></td>
+		<td class="list">0.9359585774628696</td>
+		<td class="list">0.9660290330002076</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OS_Scan2_5.html">SSA005_OS_Scan2_5</a></td>
+		<td class="list">0.9036018365800383</td>
+		<td class="list">0.9613637525874968</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OD_Scan3_8.html">SSA004_OD_Scan3_8</a></td>
+		<td class="list">0.9536895108449619</td>
+		<td class="list">0.9674925764573223</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OD_Scan2_11.html">SSA002_OD_Scan2_11</a></td>
+		<td class="list">0.9192916577768295</td>
+		<td class="list">0.9680810336182815</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA006_OD_Scan2_6.html">SSA006_OD_Scan2_6</a></td>
+		<td class="list">0.9025554382259767</td>
+		<td class="list">0.9740453587847462</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_1.html">SSA004_OS_Scan4_1</a></td>
+		<td class="list">0.935070432815123</td>
+		<td class="list">0.9561898331152906</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan3_5.html">SSA004_OS_Scan3_5</a></td>
+		<td class="list">0.9415041782729805</td>
+		<td class="list">0.9614249107410278</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OS_Scan2_3.html">SSA005_OS_Scan2_3</a></td>
+		<td class="list">0.9100376318044636</td>
+		<td class="list">0.9563777703888003</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_6.html">SSA005_OD_Scan2_6</a></td>
+		<td class="list">0.8927531840758335</td>
+		<td class="list">0.9658754120747228</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OS_Scan2_6.html">SSA007_OS_Scan2_6</a></td>
+		<td class="list">0.9509172972005239</td>
+		<td class="list">0.9545290411593828</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_1.html">SSA005_OD_Scan2_1</a></td>
+		<td class="list">0.9384503982621288</td>
+		<td class="list">0.9732545737960456</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA006_OS_Scan2_9.html">SSA006_OS_Scan2_9</a></td>
+		<td class="list">0.9244241030251374</td>
+		<td class="list">0.9685160527343708</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_5.html">SSA004_OS_Scan4_5</a></td>
+		<td class="list">0.9363776132887417</td>
+		<td class="list">0.9671479478115195</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA006_OS_Scan2_7.html">SSA006_OS_Scan2_7</a></td>
+		<td class="list">0.9169448480076301</td>
+		<td class="list">0</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OS_Scan2_8.html">SSA005_OS_Scan2_8</a></td>
+		<td class="list">0.9145835344078757</td>
+		<td class="list">0.9650476319753973</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_7.html">SSA005_OD_Scan2_7</a></td>
+		<td class="list">0.9314537929949768</td>
+		<td class="list">0.9717595975287292</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_11.html">SSA005_OD_Scan2_11</a></td>
+		<td class="list">0.91677822040869</td>
+		<td class="list">0.9654089390426838</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_2.html">SSA004_OS_Scan4_2</a></td>
+		<td class="list">0.9411049960689014</td>
+		<td class="list">0.9508957696766593</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_3.html">SSA004_OS_Scan4_3</a></td>
+		<td class="list">0.950686278216811</td>
+		<td class="list">0.9549106846404144</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_9.html">SSA004_OS_Scan4_9</a></td>
+		<td class="list">0.9443958105361888</td>
+		<td class="list">0.9605400220962279</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OS_Scan3_8.html">SSA002_OS_Scan3_8</a></td>
+		<td class="list">0.9360653501142604</td>
+		<td class="list">0.9617688672145459</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OD_Scan3_4.html">SSA004_OD_Scan3_4</a></td>
+		<td class="list">0.9440315323917411</td>
+		<td class="list">0.9598651602076259</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA003_OS_Scan4_6.html">SSA003_OS_Scan4_6</a></td>
+		<td class="list">0.9339373444777643</td>
+		<td class="list">0.9729113315378626</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan3_11.html">SSA004_OS_Scan3_11</a></td>
+		<td class="list">0.9396626039907205</td>
+		<td class="list">0.9553696648053941</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_8.html">SSA004_OS_Scan4_8</a></td>
+		<td class="list">0.9459899437846334</td>
+		<td class="list">0.9575390398001954</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_3.html">SSA005_OD_Scan2_3</a></td>
+		<td class="list">0.8913182433448639</td>
+		<td class="list">0.9680603987032403</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA003_OS_Scan4_10.html">SSA003_OS_Scan4_10</a></td>
+		<td class="list">0.932012242321754</td>
+		<td class="list">0.9632660733853257</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OD_Scan2_5.html">SSA002_OD_Scan2_5</a></td>
+		<td class="list">0.9380398386237895</td>
+		<td class="list">0.9657543368139646</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OD_Scan2_3.html">SSA007_OD_Scan2_3</a></td>
+		<td class="list">0.9248411016949153</td>
+		<td class="list">0.9479677775805704</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan4_7.html">SSA004_OS_Scan4_7</a></td>
+		<td class="list">0.9535597696214632</td>
+		<td class="list">0.9652666854583607</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OS_Scan2_10.html">SSA005_OS_Scan2_10</a></td>
+		<td class="list">0.8957131556258722</td>
+		<td class="list">0.9663199815021427</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA005_OD_Scan2_10.html">SSA005_OD_Scan2_10</a></td>
+		<td class="list">0.8909415855624843</td>
+		<td class="list">0.9704907605784682</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OS_Scan3_3.html">SSA002_OS_Scan3_3</a></td>
+		<td class="list">0.951146960014753</td>
+		<td class="list">0.9553875166880431</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OD_Scan3_1.html">SSA004_OD_Scan3_1</a></td>
+		<td class="list">0.9281020514690635</td>
+		<td class="list">0.9330025050243359</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OS_Scan3_9.html">SSA002_OS_Scan3_9</a></td>
+		<td class="list">0.9256674033676244</td>
+		<td class="list">0.9438834769113671</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA003_OS_Scan4_2.html">SSA003_OS_Scan4_2</a></td>
+		<td class="list">0.9260784738781704</td>
+		<td class="list">0.9693789815140501</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OD_Scan2_4.html">SSA002_OD_Scan2_4</a></td>
+		<td class="list">0.9459443020376244</td>
+		<td class="list">0.9577025707437559</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OS_Scan2_4.html">SSA007_OS_Scan2_4</a></td>
+		<td class="list">0.943252091669698</td>
+		<td class="list">0.9698241378426778</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan3_8.html">SSA004_OS_Scan3_8</a></td>
+		<td class="list">0.9427145346590864</td>
+		<td class="list">0.951424067054457</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OD_Scan2_10.html">SSA002_OD_Scan2_10</a></td>
+		<td class="list">0.9080702451625724</td>
+		<td class="list">0.9612746474574202</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA007_OS_Scan2_2.html">SSA007_OS_Scan2_2</a></td>
+		<td class="list">0.929216416755245</td>
+		<td class="list">0.9528212611797393</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA002_OD_Scan2_7.html">SSA002_OD_Scan2_7</a></td>
+		<td class="list">0.9313939300777234</td>
+		<td class="list">0.94324890944645</td>
+		<!-- <td class="list">TP</td> -->
+	</tr><tr class="list">
+		<td class="list"><a href="sub_report/SSA004_OS_Scan3_3.html">SSA004_OS_Scan3_3</a></td>
+		<td class="list">0.946163391105952</td>
+		<td class="list">0.9648167544710038</td>
+		<!-- <td class="list">TP</td> -->
+	</tr>
+</table>
+
+
+
+
+
+</body>
+
+</html>

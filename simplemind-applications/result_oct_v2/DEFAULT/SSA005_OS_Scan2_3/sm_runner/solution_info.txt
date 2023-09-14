@@ -1,0 +1,74 @@
+SolElement: cornea_cnn
+Attribute: SegParam: NeuralNetKeras
+cnn_arch: unet_5block
+image_rows: 256
+image_cols: 256
+num_channels: 1
+intensity_normalization: mean0std1 
+learning_rate: 0.001
+parameter: model_info architecture unet_5block
+parameter: model_info img_shape 256, 256, 1
+parameter: model_info lr 0.001
+parameter: model_info intensity_norm mean0std1
+parameter: model_info reader_class simple_image_reader
+parameter: model_info loss negative_dice
+parameter: model_info optimizer adam
+parameter: model_info decay 0.001
+parameter: model_info metrics dice, precision, recall
+parameter: training_info epochs 200
+parameter: training_info batch_size 16
+parameter: validation_info batch_size 16
+parameter: callbacks_info callbacks csvlogger,modelcheckpoint,earlystopping
+parameter: callbacks_info patience 50
+End: NeuralNetKeras
+Attribute: MemParam: RetainCands
+End: RetainCands
+Num_Cands: 1
+Num_Matched_Cands: 1
+Candidate_start
+Type: ImageRegion
+FeatureValue: 0 0
+ConfidenceScore: 2 2
+PartialConfidence: 1
+Matched: True
+RoiFile: cornea_cnn-0_m.roi
+Candidate_end
+MatchedPrimitiveRoiFile: cornea_cnn.roi
+
+SolElement: iris_cnn
+Attribute: SegParam: NeuralNetKeras
+cnn_arch: unet_5block
+image_rows: 256
+image_cols: 256
+num_channels: 1
+intensity_normalization: mean0std1 
+learning_rate: 0.0001
+parameter: model_info architecture unet_5block
+parameter: model_info img_shape 256, 256, 1
+parameter: model_info lr 0.0001
+parameter: model_info intensity_norm mean0std1
+parameter: model_info reader_class simple_image_reader
+parameter: model_info loss negative_dice
+parameter: model_info optimizer adam
+parameter: model_info decay 0.001
+parameter: model_info metrics dice, precision, recall
+parameter: training_info epochs 200
+parameter: training_info batch_size 16
+parameter: validation_info batch_size 16
+parameter: callbacks_info callbacks csvlogger,modelcheckpoint,earlystopping
+parameter: callbacks_info patience 50
+End: NeuralNetKeras
+Attribute: MemParam: RetainCands
+End: RetainCands
+Num_Cands: 1
+Num_Matched_Cands: 1
+Candidate_start
+Type: ImageRegion
+FeatureValue: 0 0
+ConfidenceScore: 2 2
+PartialConfidence: 1
+Matched: True
+RoiFile: iris_cnn-0_m.roi
+Candidate_end
+MatchedPrimitiveRoiFile: iris_cnn.roi
+

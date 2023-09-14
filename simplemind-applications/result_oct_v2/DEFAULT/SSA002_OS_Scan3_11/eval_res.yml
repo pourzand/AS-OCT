@@ -1,0 +1,28 @@
+CORNEA:
+  class: TP
+  dce_score: 0.9671344229693618
+  dice_coefficient: 0.9671344229693618
+  marking: null
+  pred_detection: 1
+  ref_detection: 1
+  roi: null
+IRIS:
+  class: TP
+  dce_score: 0.9290019227972661
+  dice_coefficient: 0.9290019227972661
+  marking: null
+  pred_detection: 1
+  ref_detection: 1
+  roi: null
+finished: true
+initials: N/A
+patient_id: N/A
+spacing: !!python/tuple
+- 1.0
+- 1.0
+- 999.0
+visuals:
+  annotation_ss: ./result_oct_v2/DEFAULT/SSA002_OS_Scan3_11/eval/image/CORNEA_a.png
+  original_ss: ./result_oct_v2/DEFAULT/SSA002_OS_Scan3_11/eval/image/cornea_cnn_a_org.png
+  output_ss: ./result_oct_v2/DEFAULT/SSA002_OS_Scan3_11/eval/image/cornea_cnn_a.png
+  preprocessed_ss: path/to/fake/image

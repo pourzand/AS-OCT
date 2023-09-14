@@ -1,0 +1,24 @@
+segmentation:
+  - dce_score_mean
+  - dice_coefficient_mean
+  - num_good_markings
+  - num_bad_markings
+detection:
+  - sensitivity
+  - specificity
+  - fpr
+classification:
+  - sensitivity
+  - specificity
+  - tp
+  - fp
+  - fn
+  - tn
+seg_det:
+  - dce_score_mean
+  - dice_coefficient_mean
+  - num_good_markings
+  - num_bad_markings
+  - sensitivity
+  - specificity
+  - fpr
