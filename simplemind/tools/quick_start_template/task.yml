@@ -1,0 +1,52 @@
+tasks:
+    - id: SM_Runner
+      import:
+        simplemind.apt_agents.distributor.task:
+            task: SMRunnerTask
+            task_func: sm_runner
+            task_checker: SM_Checker
+            task_param_generator: gen_smrunner_param
+      # casewise: True
+
+      ### UPDATE THESE #####
+      working_dir: some_path
+      resource_dir: some_path
+      ######################
+
+      # skip: 
+      #     train_screenshots: False
+      #     pred_screenshots: False
+      #     tensorboard: False
+      # cpu_preprocessing_only: False
+      # roi_dir: None
+      # force_overwrite: True
+    - id: Evaluator
+      import:
+        simplemind.apt_agents.distributor.task:
+          task: EvalTask
+          task_checker: Evaluator_Checker
+          task_param_generator: gen_evaluate_param
+        
+        ### UPDATE SOURCE ###
+        %s:
+        ############################
+            task_func: evaluate_task
+          
+      # casewise: True
+      skip:
+          eval_screenshots: False
+
+    - id: Compiler
+      import:
+        simplemind.apt_agents.distributor.task:
+          task: CompileTask
+          task_checker: Compiler_Checker
+          task_param_generator: gen_compile_param
+
+        ### UPDATE SOURCE ###
+        %s:
+        ############################
+            task_func: compile_function
+
+      # casewise: False
+      ######################
