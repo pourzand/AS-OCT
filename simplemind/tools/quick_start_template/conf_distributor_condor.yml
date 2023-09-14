@@ -1,0 +1,42 @@
+### UPDATE THESE #####
+error_path: /radraid/apps/personal/wasil/ga/debugging_ga_experiments/sm_kidney/error/distributor
+condor_workpath: /radraid/apps/personal/wasil/ga/debugging_ga_experiments/sm_kidney/distributor/pilot
+###################
+
+### For Condor ###
+import:
+  simplemind.apt_agents.distributor:
+    distributor: CondorDAGDistributor
+
+parallel_n: 5
+parallel_sub_n: 5
+parallel_misc_n: 5
+
+n_sequential_jobs: 3 
+
+timeout: null
+
+docker: 
+    image: "smaiteam/sm-develop:latest"
+
+
+####################### Ignore below #################################
+########### to be depracated: if local Docker jobs need gpu ############ 
+#     drives:
+#         ### will map via "docker run -v [key]:[value]"
+#         /cvib2: /cvib2 
+#         /scratch: /scratch 
+#         /scratch2: /scratch2 
+#         /radraid: /radraid
+#         /dingo_data: /dingo_data
+
+########### to be depracated: running independent local Docker jobs #########
+# import:
+#   simplemind.apt_agents.distributor:
+#     distributor: DockerDistributor
+
+########### Purpose: if your Condor/Docker jobs need gpu ############
+# gpu_requirement:
+#     n_gpus: 1
+#     gpu_memory_filter: 20000
+#     n_jobs: 3     # set None if you want it to be all jobs that a GPU is required

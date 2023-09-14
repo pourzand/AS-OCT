@@ -1,0 +1,62 @@
+##### (1) General settings for this specific run #####
+seed: 2172021  #random seed -- just change random seed to the date since that will change everyday and always be unique
+
+init_chroms:   # list of strings (of the binary or hex representation of a given chromosome)
+# - "1011111"
+
+chrom_hex: False
+
+##### (2) Basic evolution hyperparameters #####
+chrom_length: %s  # technically can read model for this
+max_gen: 5
+
+### (A) Overall Tournament ###
+overall_pop_size: 10
+overall_survivor_pop: 10
+overall_t_size: 4
+
+
+### (B) Crossover and Mutation Rates ####
+cxpb: 0.2               
+p_mut_per_bit: 0.05
+mutpb: 1.0
+
+
+
+##### (3) Advanced evolution hyperparameters #####
+
+### (A) Comment this to enable/disable
+# hfc:
+#     n_worst: 7
+#     survivor_pop: 4
+#     t_size: 5
+
+### (B) Disable this here and also in ops list
+# dep:
+#     min_diversity: 8.5
+#     min_n_ind: 5
+#     alpha: 1
+
+di: True
+
+###########################
+# 1. Overall tournament
+# 2. HFC Tournament
+# 3. Mutation + Crossover
+# 4. Diversity-enforced pruning
+# 5. Diversified Immigrants
+# 6. Fitness evaluation
+operations:
+    - "tourn"
+    - "shuffle"
+    - "mutation"
+    - "crossover"
+    # - "dep"
+    - "repop"
+
+# (comment out any step above to disable. for DI, set to be False)
+
+##### (4) Setting Optimizer ######
+import:
+  simplemind.apt_agents.optimizer:
+    optimizer: GA_Optimizer
