@@ -1,0 +1,305 @@
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <stdlib.h>
+
+#include "DICOMsequence.h"
+#include "Model.h"
+#include "Blackboard.h"
+#include "KnowledgeSource.h"
+#include "ModelKS.h"
+#include "SegmentationKS.h"
+#include "SchedulerKS.h"
+#include "InferencingKS.h"
+#include "MemManageKS.h"
+
+#include "ImageRegion.h"
+#include "ImageContour.h"
+#include "SearchArea.h"
+
+#include <pcl/misc/FileNameTokenizer.h>
+#include <pcl/misc/FileHelper.h>
+
+#include <pcl/misc/CommandLineParser.h>
+#include <pcl/misc/FileHelper.h>
+#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+
+#include "libNoduleClassifier.h"
+#include "mclmcrrt.h"
+#include "mclcppclass.h"
+
+Blackboard* do_segmentation(const char *image_file, const char* model_file, const char* output_directory, int &xdim, int &ydim, int &zdim) {
+	std::vector<std::string> im_fname;
+	Point os_tl(-1,-1,-1), os_br(-1,-1,-1);
+	int* im_inst_nums;
+	int num_slices_z;
+
+	int ok = 0;
+
+	cout << "Reading dicom image data..." << endl;
+	{
+		std::ifstream fp(image_file);
+		if (!fp) {
+			cerr << "ERROR: unable to open input file: " << image_file << endl;
+			exit(1);
+		}
+		char dummy[300];
+		while(!fp.eof()) {
+			fp.getline(dummy, 300);
+			std::string file = std::string(dummy);
+			boost::algorithm::trim(file);
+			if (!file.empty()) {
+				im_fname.push_back(std::string(dummy));
+				//os << std::string(dummy) << endl;
+			}
+		}
+		fp.close();
+		//os.close();
+		num_slices_z = im_fname.size();
+	}
+	DICOMsequence mis(im_fname);
+	cout << "Done reading " << num_slices_z << " slices" << endl;
+
+	int i;
+	im_inst_nums = new int [num_slices_z];
+	for(i=0; i<num_slices_z; i++) {
+		im_inst_nums[i] = mis.instance_number(i);
+	}
+	im_fname.clear();
+
+	cout << "checking slice locations....." << endl;
+	// Check that slice locations are valid and reorder if necessary
+	int prevLocSet=0, prevDiffSet=0;
+	float currDiff=0, prevLoc=0, prevDiff=0;
+	int slice_loc_ok=1;
+	float* sliceLocs = new float [mis.zdim()];
+	for(i=0; i<mis.zdim() && slice_loc_ok; i++) {
+		float ih_location = mis.slice_location(i);
+		//cout << "i=" << i << endl;
+		//cout << "inst num=" << mis.image(i).instance_number() << endl;
+		//cout << "loc=" << ih_location << endl;
+
+        if (prevLocSet) {
+  			currDiff = ih_location - prevLoc;
+
+  			if (prevDiffSet) slice_loc_ok = ((currDiff*prevDiff)>0);
+  			prevDiff = currDiff;
+  			prevDiffSet = 1;
+  		}
+  		//cout << "diff=" << currDiff << endl;
+  		prevLoc = ih_location;
+  		prevLocSet = 1;
+  		if (currDiff<0) sliceLocs[i] = -ih_location;
+        else sliceLocs[i] = ih_location;
+        //cout << "ok=" << slice_loc_ok << endl;
+      }
+      if (!slice_loc_ok) {
+	  	cerr << "ERROR: miu.cc: problem with slice locations: " << endl;
+	  	cerr << "near image with instance number " << mis.image(i-1).instance_number() << endl;
+	  	exit(1);
+	  }
+	  // **** MIU code assumes that slice location increases as z increases, so need this ****
+      if ((currDiff<0)&&(mis.zdim()>0)) sliceLocs[0] = -1*sliceLocs[0];
+      for(i=0; i<mis.zdim(); i++) {
+		  mis.slice_location(i, sliceLocs[i]);
+		//  cout << "slice location " << i << ": " << sliceLocs[i] << endl;
+	  }
+      delete [] sliceLocs;
+	  cout << "Done checking slice locations." << endl;
+
+	if (os_tl.x<0) os_tl.x = 0;
+	if (os_tl.y<0) os_tl.y = 0;
+	if (os_tl.z<0) os_tl.z = 0;
+	if (os_br.x<0) os_br.x = mis.xdim()-1;
+	if (os_br.y<0) os_br.y = mis.ydim()-1;
+	if (os_br.z<0) os_br.z = mis.zdim()-1;
+
+	// Unload (free) images that are outside bounding box given in input file
+	for (int z=0; z<mis.zdim(); z++)
+		if ((z<os_tl.z) || (z>os_br.z)) {
+			delete [] mis.image(z).pixel_data();
+		}
+
+	std::cout << "Test: " << model_file << std::endl;
+	int s_ind;
+	for(s_ind=strlen(model_file)-1; (s_ind>0) && (model_file[s_ind]!='/' && model_file[s_ind]!='\\'); s_ind--);
+	char path[300], model_name[300];
+	if (s_ind>=0) {
+		strncpy(path, model_file, s_ind);
+		path[s_ind]='\0';
+		strcpy(model_name, model_file+s_ind+1);
+	}
+	else {
+		strcpy(path, "./");
+		strcpy(model_name, model_file);
+	}
+
+	Model* m;
+	cout << "Model name: " << model_name << endl;
+	cout << "Model path: " << path << endl;
+
+	m = new Model (model_file);
+
+	m->read();
+
+	ROI overall_sarea;
+	overall_sarea.add_box(os_tl, os_br);
+	Blackboard* bb = new Blackboard (mis, *m, overall_sarea, output_directory);
+	overall_sarea.clear();
+
+	Darray<KnowledgeSource> ks(5);
+	KnowledgeSource ModelMapper("ModelMapper", "ModelKS", ModelMapperS, ModelMapperA);
+	ks.push_last(ModelMapper);
+
+	KnowledgeSource GroupFormer("GroupFormer", "SchedulerKS", GroupFormerS, GroupFormerA);
+	ks.push_last(GroupFormer);
+
+	KnowledgeSource NextGroup("NextGroup", "SchedulerKS", NextGroupS, NextGroupA);
+	ks.push_last(NextGroup);
+
+	KnowledgeSource NextSolel("NextSolel", "SchedulerKS", NextSolelS, NextSolelA);
+	ks.push_last(NextSolel);
+
+	KnowledgeSource ThreshRegGrow("ThreshRegGrow", "SegmentationKS", ThreshRegGrowS, ThreshRegGrowA, SegmentationR);
+	ks.push_last(ThreshRegGrow);
+
+	KnowledgeSource MaxCostPath("MaxCostPath", "SegmentationKS", MaxCostPathS, MaxCostPathA, SegmentationR);
+	ks.push_last(MaxCostPath);
+
+	KnowledgeSource SameCandidatesAs("SameCandidatesAs", "SegmentationKS", SameCandidatesAsS, SameCandidatesAsA, SegmentationR);
+	ks.push_last(SameCandidatesAs);
+
+	KnowledgeSource FormCandsFromSearchArea("FormCandsFromSearchArea", "SegmentationKS", FormCandsFromSearchAreaS, FormCandsFromSearchAreaA, SegmentationR);
+	ks.push_last(FormCandsFromSearchArea);
+
+	KnowledgeSource DistanceMap2DPercLocal3DMax("DistanceMap2DPercLocal3DMax", "SegmentationKS", DistanceMap2DPercLocal3DMaxS, DistanceMap2DPercLocal3DMaxA, SegmentationR);
+	ks.push_last(DistanceMap2DPercLocal3DMax);
+
+	KnowledgeSource DistanceMapRegionGrowing("DistanceMapRegionGrowing", "SegmentationKS", DistanceMapRegionGrowingS, DistanceMapRegionGrowingA, SegmentationR);
+	ks.push_last(DistanceMapRegionGrowing);
+	
+	KnowledgeSource DistanceMapWatershed("DistanceMapWatershed", "SegmentationKS", DistanceMapWatershedS, DistanceMapWatershedA, SegmentationR);
+	ks.push_last(DistanceMapWatershed);
+
+	KnowledgeSource GrowPartSolid("GrowPartSolid", "SegmentationKS", GrowPartSolidS, GrowPartSolidA, SegmentationR);
+	ks.push_last(GrowPartSolid);
+
+	KnowledgeSource ReadMatchedRoi("ReadMatchedRoi", "SegmentationKS", ReadMatchedRoiS, ReadMatchedRoiA, SegmentationR);
+	ks.push_last(ReadMatchedRoi);
+
+	KnowledgeSource ImCandConf("ImCandConf", "InferencingKS", ImCandConfS, ImCandConfA, ImCandConfR);
+	ks.push_last(ImCandConf);
+
+	KnowledgeSource FormGroupCands("FormGroupCands", "InferencingKS", FormGroupCandsS, FormGroupCandsA);
+	ks.push_last(FormGroupCands);
+
+	KnowledgeSource GroupCandConf("GroupCandConf", "InferencingKS", GroupCandConfS, GroupCandConfA);
+	ks.push_last(GroupCandConf);
+
+	KnowledgeSource MatchCands("MatchCands", "InferencingKS", MatchCandsS, MatchCandsA, MatchCandsR);
+	ks.push_last(MatchCands);
+
+	KnowledgeSource FreeCandidates("FreeCandidates", "MemManageKS", FreeCandidatesS, FreeCandidatesA, FreeCandidatesR);
+	ks.push_last(FreeCandidates);
+
+	int best_ind = 0;
+	float act_score, best_score=1.0;
+	while (best_score>0.0) {
+		best_score = 0.0;
+//cout << "computing activation scores" << endl;
+		for(i=0; i<ks.N(); i++) {
+			act_score = ks[i].activation_score(*bb);
+//cout << ks[i].name() << "   " << act_score << endl;
+			if (act_score>best_score) {
+				best_score = act_score;
+				best_ind = i;
+			}
+		}
+
+		if (best_score>0.0) {
+			cout << "Activating " << ks[best_ind].name() << "...." << endl;
+			ks[best_ind].activate(*bb);
+			cout << "Done" << endl;
+			ks[best_ind].add_activation_rec(*bb);
+		}
+
+		// *******
+		// if a lung ROI was passed into do_segmentation and the BB contains a (lung_prone_model with an unmatched air_containing SE) OR a (lung_model with an unmatched lung SE)
+		// then set the best candidate of the SE to be the ROI => set the matched candidate of the SE (see InferencingKS.MatchCandsA) find the group containing the SE and set its priority to -1.0 so that it won't be processed any further (see SchedulerKS.NextGroupA), also make sure it is the only SE in the group (otherwise throw an exception?)
+		// set the lung ROI argument to null
+		// *******
+	}
+
+	// Modify Rois to accommodate image instance numbers
+	// check if image instance numbers are continuous to decide whether ROIs can be translated using their own method or whether the translation method defined in this class is required
+	/*
+	cout << "translating rois" << endl;
+	int cts=1;
+	for(int j=1; (j<num_slices_z) && cts; j++) {
+		cts = (im_inst_nums[j]==(im_inst_nums[j-1]+1));
+	}
+	//cout << "cts=" << cts << endl;
+	for(int j=0; j<bb->num_sol_elements(); j++) {
+		SolElement& se = bb->sol_element(j);
+		//cout << se.name() << endl;
+		for(int k=0; k<se.num_candidates(); k++) {
+			//cout << "candidate" <<endl;
+			if (cts)
+				se.candidate(k)->primitive()->translate_z(im_inst_nums[0]);
+				//se.candidate(k)->primitive()->translate_to_inst_nums(im_inst_nums[0]);
+			else
+				se.candidate(k)->primitive()->map_to_inst_nums(im_inst_nums);
+		}
+		//cout << "se.matched_prim(): " << se.matched_prim() << endl;
+		if (se.matched_prim()!=0) {
+			//cout << "matched_prim" <<endl;
+			if (cts) {
+				se.matched_prim()->translate_z(im_inst_nums[0]);
+
+			}
+			else {
+				se.matched_prim()->map_to_inst_nums(im_inst_nums);
+			}
+		}
+	}
+	cout << "done" << endl;
+	*/
+
+	xdim = mis.xdim();
+	ydim = mis.ydim();
+	zdim = mis.zdim();
+
+	delete m;
+	delete im_inst_nums;
+	cout << "Done - do_segmentation" << endl;
+
+	return bb;
+}
+
+unsigned char* radlogics_segmentation(const char *image_file, const char* model_file, const char *output_directory, const char *node_name, int &xdim, int &ydim, int &zdim) {
+	if (!boost::filesystem::exists(output_directory)) boost::filesystem::create_directories(output_directory);
+
+	Blackboard* bb = do_segmentation(image_file, model_file, output_directory, xdim, ydim, zdim);
+
+	SolElement* se = bb->sol_element(node_name);
+	ImageRegion* ir = (ImageRegion*) (se->matched_prim());
+	ROItraverser rt(ir->roi());
+	
+	//unsigned char* mask = new unsigned char [bb->med_im_seq().xdim() * bb->med_im_seq().ydim() * bb->med_im_seq().zdim()];
+	unsigned char* mask = new unsigned char [xdim * ydim * zdim];
+
+	//for (int i=0; i<bb->med_im_seq().xdim() * bb->med_im_seq().ydim() * bb->med_im_seq().zdim(); i++) mask[i]='0';
+	for (int i=0; i<(xdim*ydim*zdim); i++) mask[i]='0';
+
+	register Point p1;
+	TravStatus s = rt.reset();
+	while(s<END_ROI) {
+		rt.current_point(p1);
+		//mask[p1.z*bb->med_im_seq().xdim()*bb->med_im_seq().ydim() + p1.y*bb->med_im_seq().xdim() + p1.x] = '1';
+		mask[p1.z*xdim*ydim + p1.y*xdim + p1.x] = '1';
+		s = rt.next_point();
+	}  
+
+	return mask;
+}

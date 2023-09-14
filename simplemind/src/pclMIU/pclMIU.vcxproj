@@ -1,0 +1,232 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{13C9DBF8-803F-4237-9498-FD4730B19389}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>pclMIU</RootNamespace>
+    <ProjectName>MIU_Engine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\miu.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\miu.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\miu.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\..\miu.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>miu_nod</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AnatPathEntity.h" />
+    <ClInclude Include="Attribute.h" />
+    <ClInclude Include="Blackboard.h" />
+    <ClInclude Include="Contour.h" />
+    <ClInclude Include="Darray.h" />
+    <ClInclude Include="DICOMsequence.h" />
+    <ClInclude Include="Exception.h" />
+    <ClInclude Include="Feature.h" />
+    <ClInclude Include="FPoint.h" />
+    <ClInclude Include="Fuzzy.h" />
+    <ClInclude Include="Image.h" />
+    <ClInclude Include="ImageContour.h" />
+    <ClInclude Include="ImagePrimitive.h" />
+    <ClInclude Include="ImageRegion.h" />
+    <ClInclude Include="ImageSequence.h" />
+    <ClInclude Include="InferencingKS.h" />
+    <ClInclude Include="InfParam.h" />
+    <ClInclude Include="Interval.h" />
+    <ClInclude Include="KnowledgeSource.h" />
+    <ClInclude Include="KStools.h" />
+    <ClInclude Include="Line.h" />
+    <ClInclude Include="MedicalImageSequence.h" />
+    <ClInclude Include="MemManageKS.h" />
+    <ClInclude Include="MemParam.h" />
+    <ClInclude Include="misc.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelKS.h" />
+    <ClInclude Include="PercentileCalculator.h" />
+    <ClInclude Include="Plane.h" />
+    <ClInclude Include="Point.h" />
+    <ClInclude Include="ROI.h" />
+    <ClInclude Include="ROIdescription.h" />
+    <ClInclude Include="ROItraverser.h" />
+    <ClInclude Include="ROIworkspace.h" />
+    <ClInclude Include="SchedulerKS.h" />
+    <ClInclude Include="SearchArea.h" />
+    <ClInclude Include="SegmentationKS.h" />
+    <ClInclude Include="SegParam.h" />
+    <ClInclude Include="tools_miu.h" />
+    <ClInclude Include="TravStatus.h" />
+    <ClInclude Include="ucla_v5b.h" />
+    <ClInclude Include="ucla_v5b_mamo.h" />
+    <ClInclude Include="WkspaceStatus.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AnatPathEntity.cc" />
+    <ClCompile Include="Attribute.cc" />
+    <ClCompile Include="Blackboard.cc" />
+    <ClCompile Include="Contour.cc" />
+    <ClCompile Include="Darray.cc" />
+    <ClCompile Include="Feature.cc" />
+    <ClCompile Include="FPoint.cc" />
+    <ClCompile Include="Fuzzy.cc" />
+    <ClCompile Include="Image.cc" />
+    <ClCompile Include="ImageContour.cc" />
+    <ClCompile Include="ImagePrimitive.cc" />
+    <ClCompile Include="ImageRegion.cc" />
+    <ClCompile Include="ImageSequence.cc" />
+    <ClCompile Include="InferencingKS.cc" />
+    <ClCompile Include="InfParam.cc" />
+    <ClCompile Include="Interval.cc" />
+    <ClCompile Include="KnowledgeSource.cc" />
+    <ClCompile Include="KStools.cc" />
+    <ClCompile Include="Line.cc" />
+    <ClCompile Include="MedicalImageSequence.cc" />
+    <ClCompile Include="MemManageKS.cc" />
+    <ClCompile Include="MemParam.cc" />
+    <ClCompile Include="miu_nod.cc" />
+    <ClCompile Include="Model.cc" />
+    <ClCompile Include="ModelKS.cc" />
+    <ClCompile Include="Plane.cc" />
+    <ClCompile Include="Point.cc" />
+    <ClCompile Include="ROI.cc" />
+    <ClCompile Include="ROIdescription.cc" />
+    <ClCompile Include="ROItraverser.cc" />
+    <ClCompile Include="ROIworkspace.cc" />
+    <ClCompile Include="SchedulerKS.cc" />
+    <ClCompile Include="SearchArea.cc" />
+    <ClCompile Include="SegmentationKS.cc" />
+    <ClCompile Include="SegParam.cc" />
+    <ClCompile Include="tools_miu.cc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram1.cd" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
