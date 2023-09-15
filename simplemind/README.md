@@ -1,3 +1,5 @@
+Notion Tutorial: https://www.notion.so/USC-UCLA-Collaboration-b03b64f184d948f79cbc41efd4b88236
+
 # SimpleMind adds thinking to deep neural networks
 
 <!-- badges (build / coverage / pypi version) -->
