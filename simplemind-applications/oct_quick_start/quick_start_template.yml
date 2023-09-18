@@ -1,0 +1,53 @@
+knowledge_base: 
+  node_list: oct_sn/oct_model
+  cnn_node:
+    oct_iris_cnn_KerasModel:
+      custom_architecture: 
+    oct_cornea_cnn_KerasModel:
+      custom_architecture:
+      # custom_architecture: configurations/cnn_arch/template_cnn_custom_architecture.py  ### Leave this commented out
+data:
+  data_key: oct
+  train:
+    apt_train_list: configurations/oct_apt_train.csv
+    cnn_train_list:
+      iris_cnn_KerasModel: configurations/iris_cnn_train.csv
+      cornea_cnn_KerasModel: configurations/cornea_cnn_train.csv
+configurations:
+  # task: configurations/task.yml
+  apt_optimizer:
+    configuration: configurations/conf_optimizer_ga.yml
+    evaluate_src: simplemind.apt_agents.optimizer.ga.src.evaluate.oct
+    compile_src: simplemind.apt_agents.optimizer.ga.src.evaluate.oct
+    report_template: /home/ipilab/simplemind/simplemind/apt_agents/optimizer/ga/config/oct/template.tpl
+    subreport_template: /home/ipilab/simplemind/simplemind/apt_agents/optimizer/ga/config/oct/sub_template.tpl
+
+  # apt_distributor:
+  #   local: configurations/conf_distributor_local.yml
+  #   condor: configurations/conf_distributor_condor.yml
+  computing_resource:
+    local: 
+      - configurations/oct_cnn_resource.ini
+    distributor: 
+      - configurations/oct_cnn_resource.ini
+  analysis:
+    tensorboard_port: 9876
+    # blackboard:
+    #   node_to_visualize:
+    #     abdomen: 
+    #     dense_bone:
+    #     spine_init:
+    #     spine:
+    #     kidney_cnn: reference
+    #     kidney_left_init: reference
+    #     kidney_left: reference
+    #     kidney_right_init: reference
+    #     kidney_right: reference
+    #     kidneys: reference
+    #   node_to_evaluate:
+    #     - kidney_cnn
+    #     - kidneys
+generate_application:
+  base_directory: ./sm_apps
+  app_version_name: oct_v2
+  abs_path_on: False

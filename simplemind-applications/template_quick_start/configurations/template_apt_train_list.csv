@@ -1,0 +1,4 @@
+,id,dataset,image_file,reference
+1,case_00181,kidney,data/case_00181/img.nii.gz,data/case_00181/kidn.nii.gz
+2,case_00051,kidney,data/case_00051/img.nii.gz,data/case_00051/kidn.nii.gz
+3,case_00136,kidney,data/case_00136/img.nii.gz,data/case_00136/kidn.nii.gz

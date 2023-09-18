@@ -1,0 +1,12 @@
+/*
+
+!.gitignore
+!README.md
+!readme_sn_summary_relationship_graph.png
+!quick_start_template.yml
+!run_quick_start.sh
+!run_in_docker_quick_start.sh
+
+!kidney_sn/
+!configurations/
+!configurations/*.csv

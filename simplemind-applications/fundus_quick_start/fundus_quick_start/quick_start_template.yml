@@ -1,0 +1,49 @@
+knowledge_base: 
+  node_list: fundus_sn/fundus_model
+  cnn_node:
+    fundus_optic_disk_cnn_KerasModel:
+      custom_architecture:
+      # custom_architecture: configurations/cnn_arch/template_cnn_custom_architecture.py  ### Leave this commented out
+data:
+  data_key: fundus
+  train:
+    apt_train_list: configurations/fundus_apt_train.csv
+    cnn_train_list:
+      optic_disk_cnn_KerasModel: configurations/optic_disk_cnn_train.csv
+configurations:
+  # task: configurations/task.yml
+  apt_optimizer:
+    configuration: configurations/conf_optimizer_ga.yml
+    evaluate_src: simplemind.apt_agents.optimizer.ga.src.evaluate.fundus
+    compile_src: simplemind.apt_agents.optimizer.ga.src.evaluate.fundus
+    report_template: /home/ipilab/simplemind/simplemind/apt_agents/optimizer/ga/config/fundus/template.tpl
+    subreport_template: /home/ipilab/simplemind/simplemind/apt_agents/optimizer/ga/config/fundus/sub_template.tpl
+  # apt_distributor:
+  #   local: configurations/conf_distributor_local.yml
+  #   condor: configurations/conf_distributor_condor.yml
+  computing_resource:
+    local: 
+      - configurations/fundus_cnn_resource.ini
+    distributor: 
+      - configurations/fundus_cnn_resource.ini
+  analysis:
+    tensorboard_port: 9876
+    # blackboard:
+    #   node_to_visualize:
+    #     abdomen: 
+    #     dense_bone:
+    #     spine_init:
+    #     spine:
+    #     kidney_cnn: reference
+    #     kidney_left_init: reference
+    #     kidney_left: reference
+    #     kidney_right_init: reference
+    #     kidney_right: reference
+    #     kidneys: reference
+    #   node_to_evaluate:
+    #     - kidney_cnn
+    #     - kidneys
+generate_application:
+  base_directory: ./sm_apps
+  app_version_name: fundus_v2
+  abs_path_on: False

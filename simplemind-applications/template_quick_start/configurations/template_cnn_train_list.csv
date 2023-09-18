@@ -1,0 +1,4 @@
+image,ref_roi
+data/case_00091/img.nii.gz,data/case_00091/kidn.nii.gz
+data/case_00199/img.nii.gz,data/case_00199/kidn.nii.gz
+data/case_00093/img.nii.gz,data/case_00093/kidn.nii.gz

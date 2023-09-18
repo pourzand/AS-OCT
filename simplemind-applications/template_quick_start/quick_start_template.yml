@@ -1,0 +1,47 @@
+knowledge_base: 
+  node_list: template_sn/template_model
+  cnn_node:
+    kidney_cnn_KerasModel:
+      # custom_architecture: configurations/cnn_arch/template_cnn_custom_architecture.py  ### Leave this commented out
+data:
+  data_key: template_task_name
+  train:
+    apt_train_list: configurations/template_apt_train_list.csv
+    cnn_train_list:
+      kidney_cnn_KerasModel: configurations/template_cnn_train_list.csv
+configurations:
+  # task: configurations/task.yml
+  # apt_optimizer:
+  #   configuration: configurations/conf_optimizer_ga.yml
+  #   evaluate_src: simplemind.apt_agents.optimizer.ga.src.evaluate.template_task
+  #   compile_src: simplemind.apt_agents.optimizer.ga.src.evaluate.template_task
+    # report_template: /path/to/your/task_template.tpl
+    # subreport_template: /path/to/your/task_sub_template.tpl
+  # apt_distributor:
+  #   local: configurations/conf_distributor_local.yml
+  #   condor: configurations/conf_distributor_condor.yml
+  computing_resource:
+    local: 
+      - configurations/template_cnn_resource.ini
+    distributor: 
+      - configurations/template_cnn_resource.ini
+  analysis:
+    tensorboard_port: 9876
+    # blackboard:
+    #   node_to_visualize:
+    #     abdomen: 
+    #     dense_bone:
+    #     spine_init:
+    #     spine:
+    #     kidney_cnn: reference
+    #     kidney_left_init: reference
+    #     kidney_left: reference
+    #     kidney_right_init: reference
+    #     kidney_right: reference
+    #     kidneys: reference
+    #   node_to_evaluate:
+    #     - kidney_cnn
+    #     - kidneys
+generate_application:
+  base_directory: ./sm_apps
+  app_version_name: task_name_v1
