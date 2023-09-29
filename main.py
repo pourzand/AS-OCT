@@ -39,8 +39,11 @@ from PIL import Image #for saving image
 # Load the two images with red segmentations
 
 #PUT YOUR LOCAL PATH HERE
-corneaImg = cv2.imread('/Users/seena/Downloads/DEFAULT/SSA004_OS_Scan3_11/eval/image/cornea_cnn_a.png')
-IrisImg = cv2.imread('/Users/seena/Downloads/DEFAULT/SSA004_OS_Scan3_11/eval/image/IRIS_a.png')
+# corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a.png')
+# IrisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/IRIS_a.png')
+
+corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a (2).png')
+IrisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/iris_cnn_a (2).png')
 
 # Get the height and width of the images
 height, width, _ = corneaImg.shape # Underscore just let's us ignore the values
@@ -82,7 +85,9 @@ intersection_points_left = np.column_stack(np.where(intersection_mask_left > 0))
 # Find the coordinates (points) where the right halves intersect
 intersection_points_right = np.column_stack(np.where(intersection_mask_right > 0))
 
-intersectionArr = [intersection_points_left,intersection_mask_right]
+
+
+# intersectionArr = [intersection_points_left,intersection_mask_right]
 
 # for i in range(2):
 #     print("intersectionArr shape")
@@ -131,6 +136,41 @@ for point in intersection_points_left:
 for point in intersection_points_right:
     cv2.circle(corneaImg_right_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
     cv2.circle(IrisImg_right_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
+
+box_size = (150, 150)  # Adjust the size of the bounding box as needed
+
+# Determine the bottom leftmost point for the left half
+if len(intersection_points_left) > 0:
+    bottom_leftmost_point_left = tuple(intersection_points_left[np.argmax(intersection_points_left[:, 0])])
+    cv2.circle(corneaImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 0, 0), -1)
+    cv2.circle(IrisImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 0, 0), -1)
+
+    top_left = (bottom_leftmost_point_left[1] - box_size[1] // 2, bottom_leftmost_point_left[0] - box_size[0] // 2)
+    bottom_right = (bottom_leftmost_point_left[1] + box_size[1] // 2, bottom_leftmost_point_left[0] + box_size[0] // 2)
+
+    # Draw the rectangular bounding box in blue for rn
+    cv2.rectangle(corneaImg_left_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
+    cv2.rectangle(IrisImg_left_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
+
+else:
+    print("No intersection points found in the left half.")
+
+# Determine the bottom rightmost point for the right half
+if len(intersection_points_right) > 0:
+    bottom_rightmost_point_right = tuple(intersection_points_right[np.argmax(intersection_points_right[:, 0])])
+    cv2.circle(corneaImg_right_half, tuple(reversed(bottom_rightmost_point_right)), 5, (255, 0, 0), -1)
+    cv2.circle(IrisImg_right_half, tuple(reversed(bottom_rightmost_point_right)), 5, (255, 0, 0), -1)
+
+
+    top_left = (bottom_rightmost_point_right[1] - box_size[1] // 2, bottom_rightmost_point_right[0] - box_size[0] // 2)
+    bottom_right = (bottom_rightmost_point_right[1] + box_size[1] // 2, bottom_rightmost_point_right[0] + box_size[0] // 2)
+
+    # Draw the rectangular bounding box in blue for rn
+    cv2.rectangle(corneaImg_right_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
+    cv2.rectangle(IrisImg_right_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
+
+else:
+    print("No intersection points found in the right half.")
 
 
 plt.figure(figsize=(12, 12), dpi=200)
