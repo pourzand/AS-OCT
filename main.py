@@ -40,10 +40,10 @@ from PIL import Image #for saving image
 
 #PUT YOUR LOCAL PATH HERE
 # corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a.png')
-# IrisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/IRIS_a.png')
+# irisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/IRIS_a.png')
 
 corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a (2).png')
-IrisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/iris_cnn_a (2).png')
+irisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/iris_cnn_a (2).png')
 
 # Get the height and width of the images
 height, width, _ = corneaImg.shape # Underscore just let's us ignore the values
@@ -52,14 +52,14 @@ height, width, _ = corneaImg.shape # Underscore just let's us ignore the values
 half_width = width // 2 # Floor division
 corneaImg_left_half = corneaImg[:, :half_width]
 corneaImg_right_half = corneaImg[:, half_width:]
-IrisImg_left_half = IrisImg[:, :half_width]
-IrisImg_right_half = IrisImg[:, half_width:]
+irisImg_left_half = irisImg[:, :half_width]
+irisImg_right_half = irisImg[:, half_width:]
 
 # Convert the images to the HSV color space
 hsv_corneaImg_left_half = cv2.cvtColor(corneaImg_left_half, cv2.COLOR_BGR2HSV)
 hsv_corneaImg_right_half = cv2.cvtColor(corneaImg_right_half, cv2.COLOR_BGR2HSV)
-hsv_IrisImg_left_half = cv2.cvtColor(IrisImg_left_half, cv2.COLOR_BGR2HSV)
-hsv_IrisImg_right_half = cv2.cvtColor(IrisImg_right_half, cv2.COLOR_BGR2HSV)
+hsv_irisImg_left_half = cv2.cvtColor(irisImg_left_half, cv2.COLOR_BGR2HSV)
+hsv_irisImg_right_half = cv2.cvtColor(irisImg_right_half, cv2.COLOR_BGR2HSV)
 
 # Define the lower and upper HSV values for the red color
 lower_red = np.array([0, 100, 100])
@@ -67,11 +67,11 @@ upper_red = np.array([10, 255, 255])
 
 # Create binary masks for the red regions in both left halves
 mask1_left_half = cv2.inRange(hsv_corneaImg_left_half, lower_red, upper_red)
-mask2_left_half = cv2.inRange(hsv_IrisImg_left_half, lower_red, upper_red)
+mask2_left_half = cv2.inRange(hsv_irisImg_left_half, lower_red, upper_red)
 
 # Create binary masks for the red regions in both right halves
 mask1_right_half = cv2.inRange(hsv_corneaImg_right_half, lower_red, upper_red)
-mask2_right_half = cv2.inRange(hsv_IrisImg_right_half, lower_red, upper_red)
+mask2_right_half = cv2.inRange(hsv_irisImg_right_half, lower_red, upper_red)
 
 # Find the common regions (intersection) between the left halves
 intersection_mask_left = cv2.bitwise_and(mask1_left_half, mask2_left_half)
@@ -85,57 +85,14 @@ intersection_points_left = np.column_stack(np.where(intersection_mask_left > 0))
 # Find the coordinates (points) where the right halves intersect
 intersection_points_right = np.column_stack(np.where(intersection_mask_right > 0))
 
-
-
-# intersectionArr = [intersection_points_left,intersection_mask_right]
-
-# for i in range(2):
-#     print("intersectionArr shape")
-#     print(intersectionArr[i].shape)
-#     # print("intersectionArr contents")
-#     # print(intersectionArr[i][0][:])
-#     # print("intersectionArr sum")
-#     # print(sum(intersectionArr[i][0][:]))
-
-#     if(sum(intersectionArr[i][0][:]) == 0):
-        
-#         # meaning no intersection found, we must approximate
-#         # Find the closest points between the two segmentations within the same half
-#         if(i == 0): # means left half
-#             distances = np.linalg.norm(mask1_left_half[:, np.newaxis] - mask2_left_half, axis=2)
-#         else: 
-#             distances = np.linalg.norm(mask1_right_half[:, np.newaxis] - mask2_right_half, axis=2)
-        
-#         print("distances shape")
-#         print(distances.shape)
-
-#         min_indices = np.unravel_index(np.argmin(distances), distances.shape)
-#         closest_point_left_half = intersection_points_left[min_indices[0]]
-#         closest_point_right_half = intersection_points_right[min_indices[1]]
-#         midpoint_left_half = ((closest_point_left_half[0] + closest_point_right_half[0]) // 2,
-#                             (closest_point_left_half[1] + closest_point_right_half[1]) // 2)
-
-#         # Define the size of the region to approximate (e.g., a small rectangle)
-##         region_size = (20, 20)  # You can adjust the size as needed
-
-#         # Create a mask for the region around the midpoint
-##         region_mask_left = np.zeros_like(mask1_left_half)
-##         region_mask_left[
-#             midpoint_left_half[0] - region_size[0] // 2:midpoint_left_half[0] + region_size[0] // 2,
-#             midpoint_left_half[1] - region_size[1] // 2:midpoint_left_half[1] + region_size[1] // 2
-#         ] = 255
-
-#         # Overlay the region mask on the left half of image1
-#         image1_left_half_with_region = cv2.bitwise_and(image1_left_half, image1_left_half, mask=region_mask_left)
-
 # Overlay the points of intersection on the original images
 for point in intersection_points_left:
     cv2.circle(corneaImg_left_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
-    cv2.circle(IrisImg_left_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
+    cv2.circle(irisImg_left_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
 
 for point in intersection_points_right:
     cv2.circle(corneaImg_right_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
-    cv2.circle(IrisImg_right_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
+    cv2.circle(irisImg_right_half, tuple(reversed(point)), 5, (0, 255, 0), -1)
 
 box_size = (150, 150)  # Adjust the size of the bounding box as needed
 
@@ -143,14 +100,14 @@ box_size = (150, 150)  # Adjust the size of the bounding box as needed
 if len(intersection_points_left) > 0:
     bottom_leftmost_point_left = tuple(intersection_points_left[np.argmax(intersection_points_left[:, 0])])
     cv2.circle(corneaImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 0, 0), -1)
-    cv2.circle(IrisImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 0, 0), -1)
+    cv2.circle(irisImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 0, 0), -1)
 
     top_left = (bottom_leftmost_point_left[1] - box_size[1] // 2, bottom_leftmost_point_left[0] - box_size[0] // 2)
     bottom_right = (bottom_leftmost_point_left[1] + box_size[1] // 2, bottom_leftmost_point_left[0] + box_size[0] // 2)
 
     # Draw the rectangular bounding box in blue for rn
     cv2.rectangle(corneaImg_left_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
-    cv2.rectangle(IrisImg_left_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
+    cv2.rectangle(irisImg_left_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
 
 else:
     print("No intersection points found in the left half.")
@@ -159,7 +116,7 @@ else:
 if len(intersection_points_right) > 0:
     bottom_rightmost_point_right = tuple(intersection_points_right[np.argmax(intersection_points_right[:, 0])])
     cv2.circle(corneaImg_right_half, tuple(reversed(bottom_rightmost_point_right)), 5, (255, 0, 0), -1)
-    cv2.circle(IrisImg_right_half, tuple(reversed(bottom_rightmost_point_right)), 5, (255, 0, 0), -1)
+    cv2.circle(irisImg_right_half, tuple(reversed(bottom_rightmost_point_right)), 5, (255, 0, 0), -1)
 
 
     top_left = (bottom_rightmost_point_right[1] - box_size[1] // 2, bottom_rightmost_point_right[0] - box_size[0] // 2)
@@ -167,7 +124,7 @@ if len(intersection_points_right) > 0:
 
     # Draw the rectangular bounding box in blue for rn
     cv2.rectangle(corneaImg_right_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
-    cv2.rectangle(IrisImg_right_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
+    cv2.rectangle(irisImg_right_half, top_left, bottom_right, (255, 0, 0), 2)  # (0, 0, 255) for red, 2 for thickness
 
 else:
     print("No intersection points found in the right half.")
@@ -178,11 +135,11 @@ plt.figure(figsize=(12, 12), dpi=200)
 # Display the images with intersection points for the left and right halves
 plt.subplot(221), plt.imshow(cv2.cvtColor(corneaImg_left_half, cv2.COLOR_BGR2RGB))
 plt.title('Cornea Left Half ')
-plt.subplot(222), plt.imshow(cv2.cvtColor(IrisImg_left_half, cv2.COLOR_BGR2RGB) )
+plt.subplot(222), plt.imshow(cv2.cvtColor(irisImg_left_half, cv2.COLOR_BGR2RGB) )
 plt.title('Iris Left Half')
 plt.subplot(223), plt.imshow(cv2.cvtColor(corneaImg_right_half, cv2.COLOR_BGR2RGB) )
 plt.title('Cornea Right Half')
-plt.subplot(224), plt.imshow(cv2.cvtColor(IrisImg_right_half, cv2.COLOR_BGR2RGB) )
+plt.subplot(224), plt.imshow(cv2.cvtColor(irisImg_right_half, cv2.COLOR_BGR2RGB) )
 plt.title('Iris Right Half')
 
 plt.tight_layout()
