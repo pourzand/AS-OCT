@@ -2,7 +2,7 @@
 Brent's Feedback on Results from Main.py (preliminary bounding box)
 1. The bounding box looks great.
 2. Keep the green overlay in the image display as it shows the region we want.
-3. Look at all image sets.
+3. Now run through all image sets (I am currently working on the iteration code - have to separate iris and cornea images into separate folders, input the two images of one set into each iteration).
 4. Report a percentage of which sets work vs which did not have an overlap and did not work.
 5. Report when we expect to fix this so that it works 100%.
 6. Brent is going to talk to Ben.
