@@ -1,0 +1,19 @@
+'''
+Brent's Feedback on Results from Main.py (preliminary bounding box)
+1. The bounding box looks great.
+2. Keep the green overlay in the image display as it shows the region we want.
+3. Look at all image sets.
+4. Report a percentage of which sets work vs which did not have an overlap and did not work.
+5. Report when we expect to fix this so that it works 100%.
+6. Brent is going to talk to Ben.
+7. Ben will look at our results, see if they are good.
+8. Ask Ben to give us another oct dataset or annotated scleral spurs which we can put in SimpleMind.
+9. Ask Wasil if SimpleMind still just uses traditional image analysis tools at this moment or 
+whether we can incorporate it's Cognitive Ai at this point to give some results for images that do not have prior annotations.
+'''
+
+'''
+otherwise good work on the code Seena! I am going to run it through all images. 
+It appears that for those where there is not an overlap, there will not be a bounding box (is this correct?)
+Good luck on your project and midterm.
+'''
