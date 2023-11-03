@@ -15,6 +15,26 @@ from skimage.segmentation import flood_fill # for region grow
 from PIL import Image #for saving image
 
 
+def find_closest_points(cornea_mask, iris_mask):
+    closest_distance = float('inf')
+    closest_cornea_point = None
+    closest_iris_point = None
+
+    for i in range(cornea_mask.shape[0]):
+        for j in range(cornea_mask.shape[1]):
+            if cornea_mask[i, j] > 0:
+                for m in range(iris_mask.shape[0]):
+                    for n in range(iris_mask.shape[1]):
+                        if iris_mask[m, n] > 0:
+                            distance = np.sqrt((i - m) ** 2 + (j - n) ** 2)
+                            if distance < closest_distance:
+                                closest_distance = distance
+                                closest_cornea_point = (i, j)
+                                closest_iris_point = (m, n)
+
+    return closest_cornea_point, closest_iris_point
+
+
 # print("Loading image..")
 # corneaSegmentationImg = "/Users/seena/Downloads/DEFAULT/SSA004_OS_Scan3_11/eval/image/cornea_cnn_a.png"
 
@@ -42,8 +62,8 @@ from PIL import Image #for saving image
 # corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a.png')
 # irisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/IRIS_a.png')
 
-corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a (2).png')
-irisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/iris_cnn_a (2).png')
+corneaImg = cv2.imread('/Users/seena/Downloads/SM_image_database/cornea_cnn_a (6).png')
+irisImg = cv2.imread('/Users/seena/Downloads/SM_image_database/iris_cnn_a (6).png')
 
 # Get the height and width of the images
 height, width, _ = corneaImg.shape # Underscore just let's us ignore the values
@@ -68,7 +88,9 @@ upper_red = np.array([10, 255, 255])
 # Create binary masks for the red regions in both left halves
 mask1_left_half = cv2.inRange(hsv_corneaImg_left_half, lower_red, upper_red)
 mask2_left_half = cv2.inRange(hsv_irisImg_left_half, lower_red, upper_red)
-
+# print("prep")
+# print(sum(mask1_left_half))
+# print("done")
 # Create binary masks for the red regions in both right halves
 mask1_right_half = cv2.inRange(hsv_corneaImg_right_half, lower_red, upper_red)
 mask2_right_half = cv2.inRange(hsv_irisImg_right_half, lower_red, upper_red)
@@ -96,6 +118,10 @@ for point in intersection_points_right:
 
 box_size = (150, 150)  # Adjust the size of the bounding box as needed
 
+
+#wasil suggested
+# IF NO OVERLAP, use dialation (morohology) or region grow, depends on structuring element for dilation
+
 # Determine the bottom leftmost point for the left half
 if len(intersection_points_left) > 0:
     bottom_leftmost_point_left = tuple(intersection_points_left[np.argmax(intersection_points_left[:, 0])])
@@ -111,6 +137,45 @@ if len(intersection_points_left) > 0:
 
 else:
     print("No intersection points found in the left half.")
+    dilation_iterations = 5  # Increase or decrease as necessary
+
+    # Create structuring elements for dilation
+    kernel = np.ones((5, 5), np.uint8)  # You can adjust the kernel size
+
+    # Perform dilation on both masks
+    dilated_mask1 = cv2.dilate(mask1_left_half, kernel, iterations=dilation_iterations)
+    dilated_mask2 = cv2.dilate(mask2_left_half, kernel, iterations=dilation_iterations)
+
+    # Find the common region by taking the bitwise AND of the two dilated masks
+    intersection_mask_left = cv2.bitwise_and(dilated_mask1, dilated_mask2)
+
+    # Find the coordinates (points) where the left halves intersect after dilation
+    intersection_points_left = np.column_stack(np.where(intersection_mask_left > 0))
+    print("intersection now?")
+    print(len(intersection_points_left))
+    #--repeat code
+    #coloring in
+    for point in intersection_points_left:
+        cv2.circle(corneaImg_left_half, tuple(reversed(point)), 5, (255, 0, 0), -1)
+        cv2.circle(irisImg_left_half, tuple(reversed(point)), 5, (255, 0, 0), -1)
+
+
+    bottom_leftmost_point_left = tuple(intersection_points_left[np.argmax(intersection_points_left[:, 0])])
+    cv2.circle(corneaImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 255, 255), -1)
+    cv2.circle(irisImg_left_half, tuple(reversed(bottom_leftmost_point_left)), 5, (255, 255, 255), -1)
+
+    top_left = (bottom_leftmost_point_left[1] - box_size[1] // 2, bottom_leftmost_point_left[0] - box_size[0] // 2)
+    bottom_right = (bottom_leftmost_point_left[1] + box_size[1] // 2, bottom_leftmost_point_left[0] + box_size[0] // 2)
+
+    # Draw the rectangular bounding box in blue for rn
+    cv2.rectangle(corneaImg_left_half, top_left, bottom_right, (255, 255, 255), 2)  # (0, 0, 255) for red, 2 for thickness
+    cv2.rectangle(irisImg_left_half, top_left, bottom_right, (255, 255, 255), 2)  # (0, 0, 255) for red, 2 for thickness
+
+
+
+    #--repeat code
+
+
 
 # Determine the bottom rightmost point for the right half
 if len(intersection_points_right) > 0:
@@ -128,6 +193,7 @@ if len(intersection_points_right) > 0:
 
 else:
     print("No intersection points found in the right half.")
+    # approximate, find closest pt between, use a seed pt for region grow
 
 
 plt.figure(figsize=(12, 12), dpi=200)
